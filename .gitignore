@@ -1,0 +1,3 @@
+*.pyc
+bot.sqlite
+.env
