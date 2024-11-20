@@ -1,5 +1,6 @@
 import re
 import pprint
+from utils.helpers import clean_amazon_url
 
 SECTION_SEPARATOR = "\n"
 
@@ -42,20 +43,14 @@ def build_book_url(book_info):
             link for link in combined_links if link.get("name") == "Amazon"
         ]
         # switch to string.format
-        string += " ── [Buy on Amazon](%s)" % filtered_links[0]["url"]
-
+        string += " ── [View on Amazon](%s)" % clean_amazon_url(
+            filtered_links[0]["url"]
+        )
     return string
 
 
-def build_book_info(book_info, is_long_version: bool):
+def build_book_info(book_info, is_long_version: bool, book_suggestions_count: float):
     genre_names = get_genres(book_info["bookGenres"])
-    # formated_description = (
-    #     "\n".join(
-    #         [">" + chunk for chunk in book_info["descriptionStripped"].split("\n")]
-    #     )
-    #     if book_info["descriptionStripped"] is not None
-    #     else ""
-    # )
 
     info = {
         "title": book_info["title"],
@@ -68,7 +63,7 @@ def build_book_info(book_info, is_long_version: bool):
     }
 
     info_string = """
-By: {author_name} | {pages} pages | Rating: {rating} | Published: {published_date} | Popular Shelves: {popular_shelves}
+^(By: {author_name} | Rating: {rating} | {pages} pages | Published: {published_date} | Popular Shelves: {popular_shelves})
         """.format(
         **info
     )
@@ -76,7 +71,13 @@ By: {author_name} | {pages} pages | Rating: {rating} | Published: {published_dat
     if len(book_info["description"]) and is_long_version:
         info_string += "\n\n" + format_description(book_info["description"])
 
-    return info_string
+    s = "s" if book_suggestions_count > 1 else ""
+    info_string += "\n\n" + "^(This book has been suggested %s time%s)" % (
+        book_suggestions_count,
+        s,
+    )
+
+    return info_string + "\n\n"
 
 
 def build_book_comment(book_info, is_long_version: bool, book_suggestions_count: float):
@@ -85,17 +86,19 @@ def build_book_comment(book_info, is_long_version: bool, book_suggestions_count:
 
     formatted_reddit_comment += build_book_url(book_info)
     formatted_reddit_comment += SECTION_SEPARATOR
-    formatted_reddit_comment += build_book_info(book_info, is_long_version)
+    formatted_reddit_comment += build_book_info(
+        book_info, is_long_version, book_suggestions_count
+    )
     formatted_reddit_comment += SECTION_SEPARATOR
 
     return formatted_reddit_comment
 
 
-def build_footer(suggestions: float):
+def build_footer(suggestions: float, comment_id: str):
     s = "s" if suggestions > 1 else ""
     return (
-        "^(%s book%s suggested | )[^(Source)](https://github.com/rodohanna/reddit-goodreads-bot)"
-        % (suggestions, s)
+        "^(%s book%s suggested | )[^(Mistake?)](https://tally.so/r/w5lLWE?reddit_comment_id=%s) ^(| ) [^(Keep me running ♥)](https://buymeacoffee.com/lmssieh)"
+        % (suggestions, s, comment_id)
     )
 
 

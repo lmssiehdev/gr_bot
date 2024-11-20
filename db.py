@@ -117,7 +117,11 @@ class DB:
         self.check_connection()
         cursor = self.conn.execute(select, (book_id,))
         count = cursor.fetchall()
-        return count[0][0]
+
+        if count:
+            return count[0][0]
+
+        return 0
 
     def save_book(self, book):
         insertion = """

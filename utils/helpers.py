@@ -1,5 +1,6 @@
 import re
 from typing import List, Tuple
+from urllib.parse import urlparse, urlunparse
 
 
 def extract_book_and_author(title):
@@ -38,7 +39,17 @@ def split_book_title_and_series(book_title: str) -> Tuple[str, str | None]:
     return (book_title, None)
 
 
-reslut = split_book_title_and_series(
-    "The Name of the Wind (The Kingkiller Chronicle, #1)"
-)
-print(reslut)
+def clean_amazon_url(url: str) -> str:
+    """
+    Cleans up an Amazon product URL by retaining only the essential part with the ASIN.
+    """
+    amazon_url_pattern = re.compile(
+        r"^(?:https?://)?(www[^/]+).*?(/(?:gp/product|dp)/[^/]+).*"
+    )
+    result = amazon_url_pattern.sub(r"https://\1\2/", url)
+
+    if not result.endswith("/"):
+        result += "/"
+
+    result += "ref=nosim?tag=goodreadsbotr-20"
+    return result
