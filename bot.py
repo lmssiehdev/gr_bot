@@ -21,7 +21,6 @@ reddit = praw.Reddit(
 
 class Bot:
     def __init__(self):
-        # self.reddit = praw.Reddit()
         self.db = DB()
 
         self.db.create_tables()
@@ -65,6 +64,9 @@ class Bot:
     def listen_to_user(
         self,
     ):
+        """
+        used for easy testing
+        """
         for comment in reddit.redditor("WeirdDetail9").stream.comments(
             skip_existing=True
         ):
@@ -77,16 +79,14 @@ class Bot:
                 continue
             comment.reply(formatted_reddit_comment)
 
-    def listen_to_subreddit(self):
-        subreddit = reddit.subreddit("booksuggestions+suggestmeabook+books")
+    def listen_to_subreddits(self):
+        subreddit = reddit.subreddit("booksuggestions")
         for comment in subreddit.stream.comments(skip_existing=True):
-            print(comment.permalink, comment.subreddit.display_name)
-            continue
             comment_invocations = self.db.count_comment_invocations(comment.id)
             if comment_invocations > 0:
                 continue
             formatted_reddit_comment = self.build_bot_comment(comment)
-            # comment.reply(formatted_reddit_comment)
+            comment.reply(formatted_reddit_comment)
 
     def build_bot_comment(self, comment):
         submission = comment.submission
@@ -127,4 +127,4 @@ class Bot:
 
 
 bot = Bot()
-bot.listen_to_user()
+bot.listen_to_subreddits()
