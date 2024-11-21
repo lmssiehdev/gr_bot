@@ -67,7 +67,7 @@ class Bot:
         """
         used for easy testing
         """
-        for comment in reddit.redditor("WeirdDetail9").stream.comments(
+        for comment in reddit.redditor(env_vars.get("REDDIT_USERNAME")).stream.comments(
             skip_existing=True
         ):
             comment_invocations = self.db.count_comment_invocations(comment.id)
@@ -81,7 +81,7 @@ class Bot:
 
     def listen_to_subreddits(self):
         subreddit = reddit.subreddit("booksuggestions")
-        for comment in subreddit.stream.comments(skip_existing=True):
+        for comment in subreddit.stream.comments():
             comment_invocations = self.db.count_comment_invocations(comment.id)
             if comment_invocations > 0:
                 continue
@@ -133,4 +133,5 @@ class Bot:
 
 
 bot = Bot()
-bot.listen_to_subreddits()
+# bot.listen_to_user()
+# bot.listen_to_subreddits()
