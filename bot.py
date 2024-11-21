@@ -85,7 +85,12 @@ class Bot:
             comment_invocations = self.db.count_comment_invocations(comment.id)
             if comment_invocations > 0:
                 continue
+
             formatted_reddit_comment = self.build_bot_comment(comment)
+            if (formatted_reddit_comment is None) or (
+                len(formatted_reddit_comment) == 0
+            ):
+                continue
             comment.reply(formatted_reddit_comment)
 
     def build_bot_comment(self, comment):
