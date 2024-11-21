@@ -1,6 +1,5 @@
 import re
-import pprint
-from utils.helpers import clean_amazon_url
+from utils.helpers import extract_asin
 
 SECTION_SEPARATOR = "\n"
 
@@ -42,10 +41,13 @@ def build_book_url(book_info):
         filtered_links = [
             link for link in combined_links if link.get("name") == "Amazon"
         ]
-        # switch to string.format
-        string += " ── [View on Amazon](%s)" % clean_amazon_url(
-            filtered_links[0]["url"]
-        )
+
+        asin = extract_asin(filtered_links[0]["url"])
+
+        if asin is None:
+            return string
+
+        string += " ── [View on Amazon](https://grbotlink.vercel.app/book/%s)" % asin
     return string
 
 

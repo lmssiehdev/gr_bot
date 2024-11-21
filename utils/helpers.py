@@ -53,3 +53,21 @@ def clean_amazon_url(url: str) -> str:
 
     result += "ref=nosim?tag=goodreadsbotr-20"
     return result
+
+
+def extract_asin(url: str) -> str:
+    """
+    Extracts the ASIN (Amazon Standard Identification Number) from an Amazon product URL.
+    """
+    patterns = [
+        r"/dp/([A-Z0-9]{10})/",
+        r"/gp/product/([A-Z0-9]{10})/",
+        r"/gp/aw/d/([A-Z0-9]{10})",
+    ]
+
+    for pattern in patterns:
+        match = re.search(pattern, url)
+        if match:
+            return match.group(1)
+
+    return None
