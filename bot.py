@@ -74,7 +74,6 @@ class Bot:
             if comment_invocations > 0:
                 continue
             formatted_reddit_comment = self.build_bot_comment(comment)
-            print(formatted_reddit_comment)
             if formatted_reddit_comment is None:
                 continue
             comment.reply(formatted_reddit_comment)
