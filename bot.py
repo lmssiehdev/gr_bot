@@ -119,7 +119,8 @@ class Bot:
 
             invocations = self.db.count_invocations()
             formatted_reddit_comment += build_footer(
-                suggestions=invocations, comment_id=comment.id
+                suggestions=invocations,
+                permalink=comment.permalink,
             )
 
             return formatted_reddit_comment

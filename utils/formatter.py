@@ -81,7 +81,6 @@ def build_book_info(book_info, is_long_version: bool, book_suggestions_count: fl
 
 
 def build_book_comment(book_info, is_long_version: bool, book_suggestions_count: float):
-    # pprint.pprint(book_info)
     formatted_reddit_comment = ""
 
     formatted_reddit_comment += build_book_url(book_info)
@@ -94,11 +93,11 @@ def build_book_comment(book_info, is_long_version: bool, book_suggestions_count:
     return formatted_reddit_comment
 
 
-def build_footer(suggestions: float, comment_id: str):
+def build_footer(suggestions: float, permalink: str):
     s = "s" if suggestions > 1 else ""
     return (
-        "^(%s book%s suggested | )[^(Mistake?)](https://tally.so/r/w5lLWE?reddit_comment_id=%s) ^(| ) [^(Keep me running ♥)](https://buymeacoffee.com/lmssieh)"
-        % (suggestions, s, comment_id)
+        "^(%s book%s suggested | )[^(Mistake?)](https://tally.so/r/w5lLWE?reddit_comment_url=%s)"
+        % (suggestions, s, permalink)
     )
 
 
