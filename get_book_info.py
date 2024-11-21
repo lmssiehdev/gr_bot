@@ -5,7 +5,6 @@ import requests
 from bs4 import BeautifulSoup
 from utils.formatter import extract_id_from_url
 from utils.helpers import extract_book_and_author, split_book_title_and_series
-import pprint
 from thefuzz import process, fuzz
 
 # Load environment variables as a dictionary
