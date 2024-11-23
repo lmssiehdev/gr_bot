@@ -2,7 +2,7 @@ import praw
 import time
 from uuid import uuid4
 from dotenv import dotenv_values
-from get_book_info import get_book_info_based_on_search_query
+from get_book_info import get_book_id_from_search_query, query_book
 from utils.helpers import extract_recommendations
 from utils.formatter import build_book_comment, build_footer
 from db import DB
@@ -98,7 +98,12 @@ class Bot:
         for recommendation, is_long_version in extract_recommendations(comment.body)[
             :10
         ]:
-            book_info = get_book_info_based_on_search_query(recommendation)
+            book_id = get_book_id_from_search_query(recommendation)
+
+            if book_id is None:
+                continue
+
+            book_info = query_book(book_id)
 
             if book_info is None:
                 continue
@@ -131,6 +136,6 @@ class Bot:
         return None
 
 
-bot = Bot()
+# bot = Bot()
 # bot.listen_to_user()
 # bot.listen_to_subreddits()
