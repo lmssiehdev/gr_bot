@@ -123,11 +123,10 @@ class Bot:
             post = (submission.id, submission.title, submission.url)
             self.db.save_post(post)
 
-            SECTION_SEPARATOR = "\n"
-            formatted_reddit_comment += "***" + SECTION_SEPARATOR
-
             invocations = self.db.count_invocations()
             if False:
+                SECTION_SEPARATOR = "\n"
+                formatted_reddit_comment += "***" + SECTION_SEPARATOR
                 formatted_reddit_comment += build_footer(
                     suggestions=invocations,
                     permalink=comment.permalink,

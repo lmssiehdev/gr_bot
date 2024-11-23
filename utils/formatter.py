@@ -80,7 +80,7 @@ def build_book_info(book_info, is_long_version: bool, book_suggestions_count: fl
         s,
     )
 
-    return info_string + "\n\n"
+    return info_string + "\n\n" + "___" + "\n\n"
 
 
 def build_book_comment(book_info, is_long_version: bool, book_suggestions_count: float):
