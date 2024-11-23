@@ -32,6 +32,7 @@ def build_book_url(book_info):
     title = book_info["title"]
     url = book_info["webUrl"]
 
+    return f"Book: {title}  \n\n  URL: {url.replace('https://www.', '')}"
     string = "[**%s**](%s)" % (title, url)
 
     if book_info["links"]:

@@ -127,10 +127,11 @@ class Bot:
             formatted_reddit_comment += "***" + SECTION_SEPARATOR
 
             invocations = self.db.count_invocations()
-            formatted_reddit_comment += build_footer(
-                suggestions=invocations,
-                permalink=comment.permalink,
-            )
+            if False:
+                formatted_reddit_comment += build_footer(
+                    suggestions=invocations,
+                    permalink=comment.permalink,
+                )
 
             return formatted_reddit_comment
         return None
