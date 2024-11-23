@@ -60,7 +60,7 @@ def build_book_info(book_info, is_long_version: bool, book_suggestions_count: fl
         "webUrl": book_info["webUrl"],
         "author_name": book_info["primaryContributorEdge"]["node"]["name"] or "?",
         "pages": book_info["details"]["numPages"] or "?",
-        "published_date": "2024-11-15" or "?",
+        "published_date": book_info["details"]["publicationTime"] or "?",
         "popular_shelves": f"{", ".join(genre_names[:5])}",
         "rating": book_info["stats"]["averageRating"] or "?",
     }
