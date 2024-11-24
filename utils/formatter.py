@@ -1,5 +1,6 @@
 import re
 from utils.helpers import extract_asin
+from datetime import datetime
 
 SECTION_SEPARATOR = "\n"
 
@@ -52,6 +53,13 @@ def build_book_url(book_info):
     return string
 
 
+def format_timestamp(timestamp: float) -> str:
+    if timestamp is None:
+        return "?"
+
+    return datetime.fromtimestamp(timestamp / 1000).strftime("%m/%d/%Y")
+
+
 def build_book_info(book_info, is_long_version: bool, book_suggestions_count: float):
     genre_names = get_genres(book_info["bookGenres"])
 
@@ -60,7 +68,7 @@ def build_book_info(book_info, is_long_version: bool, book_suggestions_count: fl
         "webUrl": book_info["webUrl"],
         "author_name": book_info["primaryContributorEdge"]["node"]["name"] or "?",
         "pages": book_info["details"]["numPages"] or "?",
-        "published_date": book_info["details"]["publicationTime"] or "?",
+        "published_date": format_timestamp(book_info["details"]["publicationTime"]),
         "popular_shelves": f"{", ".join(genre_names[:5])}",
         "rating": book_info["stats"]["averageRating"] or "?",
     }
