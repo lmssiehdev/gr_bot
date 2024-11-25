@@ -98,6 +98,9 @@ class Bot:
         for recommendation, is_long_version in extract_recommendations(comment.body)[
             :10
         ]:
+            if recommendation == "book name":
+                continue
+
             book_id = get_book_id_from_search_query(recommendation)
 
             if book_id is None:
