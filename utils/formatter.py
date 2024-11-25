@@ -106,7 +106,7 @@ def build_book_comment(book_info, is_long_version: bool, book_suggestions_count:
 def build_footer(suggestions: float, permalink: str):
     s = "s" if suggestions > 1 else ""
     return (
-        "^(%s book%s suggested | )[^(Mistake?)](https://tally.so/r/w5lLWE?reddit_comment_url=%s)"
+        "^(%s book%s suggested | )[^(Mistake?)](https://gr-bot.vercel.app/report?permalink=%s)"
         % (suggestions, s, permalink)
     )
 
