@@ -105,10 +105,8 @@ def build_book_comment(book_info, is_long_version: bool, book_suggestions_count:
 
 def build_footer(suggestions: float, permalink: str):
     s = "s" if suggestions > 1 else ""
-    return (
-        "^(%s book%s suggested | )[^(Mistake?)](https://gr-bot.vercel.app/report?permalink=%s)"
-        % (suggestions, s, permalink)
-    )
+
+    return f"^({suggestions} book{s} suggested | ) ^({{{{ book name }}}} to summon me  | )[^(Mistake?)](https://gr-bot.vercel.app/report?permalink={permalink})"
 
 
 def format_description(description):
