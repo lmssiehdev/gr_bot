@@ -45,10 +45,10 @@ def build_book_url(book_info):
 
         asin = extract_asin(filtered_links[0]["url"])
 
-        if asin is None:
+        if asin is None or True:
             return string
 
-        string += " ── [View on Amazon](https://grbotlink.vercel.app/book/%s)" % asin
+        string += " ── [View on Amazon](https://gr-bot.vercel.app/book/%s)" % asin
     return string
 
 
