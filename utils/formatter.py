@@ -1,41 +1,86 @@
-import re
-from utils.helpers import extract_asin
 from datetime import datetime
-
-SECTION_SEPARATOR = "\n"
-
-
-def format_book_footer(self):
-    s = "s" if self.book_suggestions > 1 else ""
-    return "^(This book has been suggested %s time%s)" % (self.book_suggestions, s)
+from typing import Any, Dict, List, Optional
+from utils.helpers import extract_asin
+import re
 
 
-def extract_id_from_url(url):
-    """
-    Extracts the numeric ID from a Goodreads book URL.
-    """
+class CommnentFormatter:
+    def __init__(self, book_info, is_long_version: bool, book_suggestions_count: float):
+        self.book_info = book_info
+        self.is_long_version = is_long_version
+        self.book_suggestions_count = book_suggestions_count
+        self.section_separator = "\n"
+        self.include_amazon_url = False
 
-    match = re.search(r"/book/show/(\d+)", url)
-    if match:
-        return int(match.group(1))
-    return None
+    def build_book_comment(self) -> str:
+        return (
+            f"{self.build_book_header()}"
+            f"{self.section_separator}"
+            f"{self.build_book_data()}"
+            f"{self.section_separator}"
+        )
 
+    def build_book_header(self):
+        title = self.book_info["title"]
+        url = self.book_info["webUrl"]
 
-def get_genres(book_genres):
-    if not book_genres:
-        return []
+        string = f"[**{title}**]({url})"
 
-    genre_names = [genre["genre"]["name"] for genre in book_genres]
-    return genre_names[:5]
+        # if not self.include_amazon_url:
+        #     return string + self.section_separator
 
+        book_id = self.get_amazon_book_id(self.book_info)
 
-def build_book_url(book_info):
-    title = book_info["title"]
-    url = book_info["webUrl"]
+        if book_id is None:
+            return string
 
-    string = "[**%s**](%s)" % (title, url)
+        string += f" ── [View on Amazon](https://gr-bot.vercel.app/book/{book_id})"
 
-    if book_info["links"]:
+        return string + self.section_separator
+
+    def build_book_data(self) -> str:
+        book_info = self.book_info
+        info = {
+            "title": book_info["title"],
+            "webUrl": book_info["webUrl"],
+            "author_name": book_info["primaryContributorEdge"]["node"]["name"] or "?",
+            "pages": book_info["details"]["numPages"] or "?",
+            "published_date": self.format_timestamp(
+                book_info["details"]["publicationTime"]
+            ),
+            "popular_shelves": self.get_genres(book_info["bookGenres"]),
+            "rating": book_info["stats"]["averageRating"] or "?",
+        }
+
+        info_string = (
+            f"^(By: {info['author_name']} | "
+            f"Rating: {info['rating']} | "
+            f"{info['pages']} pages | "
+            f"Published: {info['published_date']} "
+            f"{info['popular_shelves']})"
+        )
+
+        if len(book_info["description"]) and self.is_long_version:
+            info_string += f"\n\n{self.format_description(book_info['description'])}"
+
+        s = "s" if self.book_suggestions_count > 1 else ""
+        info_string += (
+            f"\n\n^(This book has been suggested {self.book_suggestions_count} time{s})"
+        )
+
+        info_string += "\n\n___\n\n"
+
+        return info_string
+
+    def format_book_footer(self, book_suggestions: int) -> str:
+        s = "s" if book_suggestions > 1 else ""
+        return f"^(This book has been suggested {book_suggestions} time{s})"
+
+    @staticmethod
+    def get_amazon_book_id(book_info) -> Optional[str]:
+        if not book_info["links"]:
+            return None
+
         primary = book_info["links"].get("primaryAffiliateLink", {})
         secondary = book_info["links"].get("secondaryAffiliateLinks", [])
         combined_links = [primary] + secondary
@@ -43,75 +88,48 @@ def build_book_url(book_info):
             link for link in combined_links if link.get("name") == "Amazon"
         ]
 
-        asin = extract_asin(filtered_links[0]["url"])
+        return extract_asin(filtered_links[0]["url"]) if filtered_links else None
 
-        if asin is None or True:
-            return string
+    @staticmethod
+    def extract_id_from_url(url: str) -> Optional[int]:
+        """
+        Extracts the numeric ID from a Goodreads book URL.
+        """
+        match = re.search(r"/book/show/(\d+)", url)
 
-        string += " ── [View on Amazon](https://gr-bot.vercel.app/book/%s)" % asin
-    return string
+        if match:
+            return int(match.group(1))
+        return None
 
+    @staticmethod
+    def format_description(description: str) -> str:
+        description = re.sub("<.*?>", "", description.replace("<br />", "\n"))
+        return "\n".join(f">{chunk}" for chunk in description.split("\n"))
 
-def format_timestamp(timestamp: float) -> str:
-    if timestamp is None:
-        return "?"
+    @staticmethod
+    def format_timestamp(timestamp: float) -> str:
+        """Convert timestamp to formatted date string."""
+        return (
+            datetime.fromtimestamp(timestamp / 1000).strftime("%m/%d/%Y")
+            if timestamp
+            else "?"
+        )
 
-    return datetime.fromtimestamp(timestamp / 1000).strftime("%m/%d/%Y")
+    @staticmethod
+    def get_genres(book_genres: List[Dict[str, Any]]) -> str:
+        if not book_genres:
+            return ""
 
+        genre_names = [genre["genre"]["name"] for genre in book_genres]
+        shelves_string = f"{", ".join(genre_names[:5])}"
 
-def build_book_info(book_info, is_long_version: bool, book_suggestions_count: float):
-    genre_names = get_genres(book_info["bookGenres"])
+        return f" | Popular Shelves: {shelves_string}"
 
-    info = {
-        "title": book_info["title"],
-        "webUrl": book_info["webUrl"],
-        "author_name": book_info["primaryContributorEdge"]["node"]["name"] or "?",
-        "pages": book_info["details"]["numPages"] or "?",
-        "published_date": format_timestamp(book_info["details"]["publicationTime"]),
-        "popular_shelves": f"{", ".join(genre_names[:5])}",
-        "rating": book_info["stats"]["averageRating"] or "?",
-    }
-
-    info_string = """
-^(By: {author_name} | Rating: {rating} | {pages} pages | Published: {published_date} | Popular Shelves: {popular_shelves})
-        """.format(
-        **info
-    )
-
-    if len(book_info["description"]) and is_long_version:
-        info_string += "\n\n" + format_description(book_info["description"])
-
-    s = "s" if book_suggestions_count > 1 else ""
-    info_string += "\n\n" + "^(This book has been suggested %s time%s)" % (
-        book_suggestions_count,
-        s,
-    )
-
-    return info_string + "\n\n" + "___" + "\n\n"
-
-
-def build_book_comment(book_info, is_long_version: bool, book_suggestions_count: float):
-    formatted_reddit_comment = ""
-
-    formatted_reddit_comment += build_book_url(book_info)
-    formatted_reddit_comment += SECTION_SEPARATOR
-    formatted_reddit_comment += build_book_info(
-        book_info, is_long_version, book_suggestions_count
-    )
-    formatted_reddit_comment += SECTION_SEPARATOR
-
-    return formatted_reddit_comment
-
-
-def build_footer(suggestions: float, permalink: str):
-    s = "s" if suggestions > 1 else ""
-
-    return f"^({suggestions} book{s} suggested | ) ^({{{{ book name }}}} to summon me  | )[^(Mistake?)](https://gr-bot.vercel.app/report?permalink={permalink})"
-
-
-def format_description(description):
-    description = re.sub("<.*?>", "", description.replace("<br />", "\n"))
-
-    chunks = [">" + chunk for chunk in description.split("\n")]
-
-    return "\n".join(chunks)
+    @staticmethod
+    def build_comment_footer(suggestions, permalink):
+        s = "s" if suggestions > 1 else ""
+        return (
+            f"^({suggestions} book{s} suggested | ) "
+            f"^({{{{ book name }}}} to summon me  | )"
+            f"[^(Mistake?)](https://gr-bot.vercel.app/report?permalink={permalink})"
+        )

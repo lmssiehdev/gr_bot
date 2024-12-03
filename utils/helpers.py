@@ -1,6 +1,5 @@
 import re
-from typing import List, Tuple
-from urllib.parse import urlparse, urlunparse
+from typing import List, Optional, Tuple
 from thefuzz import fuzz
 
 
@@ -56,7 +55,7 @@ def clean_amazon_url(url: str) -> str:
     return result
 
 
-def extract_asin(url: str) -> str:
+def extract_asin(url: str) -> Optional[str]:
     """
     Extracts the ASIN (Amazon Standard Identification Number) from an Amazon product URL.
     """

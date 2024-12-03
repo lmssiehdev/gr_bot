@@ -3,8 +3,8 @@ import time
 from uuid import uuid4
 from dotenv import dotenv_values
 from get_book_info import get_book_id_from_search_query, query_book
+from utils.formatter import CommnentFormatter
 from utils.helpers import extract_recommendations
-from utils.formatter import build_book_comment, build_footer
 from db import DB
 from utils.analytics import posthog
 
@@ -115,11 +115,12 @@ class Bot:
 
             book_suggestions_count = self.db.count_book_requests(book_info["legacyId"])
 
-            formatted_reddit_comment += build_book_comment(
+            formatter = CommnentFormatter(
                 book_info=book_info,
                 is_long_version=is_long_version,
                 book_suggestions_count=book_suggestions_count,
             )
+            formatted_reddit_comment += formatter.build_book_comment()
 
         if len(formatted_reddit_comment) > 0:
             # We are responding to a comment, so let's save the post
@@ -127,14 +128,14 @@ class Bot:
             self.db.save_post(post)
 
             invocations = self.db.count_invocations()
-            SECTION_SEPARATOR = "\n"
-            formatted_reddit_comment += SECTION_SEPARATOR
-            formatted_reddit_comment += build_footer(
+            comment_footer = formatter.build_comment_footer(
                 suggestions=invocations,
                 permalink=comment.permalink,
             )
 
-            return formatted_reddit_comment
+            return (
+                formatted_reddit_comment + formatter.section_separator + comment_footer
+            )
         return None
 
 

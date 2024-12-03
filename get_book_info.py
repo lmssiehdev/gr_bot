@@ -4,7 +4,7 @@ from dotenv import dotenv_values
 import requests
 from bs4 import BeautifulSoup
 from utils.book_matcher import BookMatcher
-from utils.formatter import extract_id_from_url
+from utils.formatter import CommnentFormatter
 from utils.helpers import (
     extract_book_and_author,
 )
@@ -135,11 +135,11 @@ def get_book_id_from_search_query(
 
         if chosen_book is not None:
             goodreads_link = chosen_book.find("a", class_="bookTitle")["href"]
-            book_id = extract_id_from_url(goodreads_link)
+            book_id = CommnentFormatter.extract_id_from_url(goodreads_link)
             return book_id
 
         closest_match = soup.find_all("tr")[0]
-        book_id = extract_id_from_url(
+        book_id = CommnentFormatter.extract_id_from_url(
             closest_match.find("a", class_="bookTitle")["href"]
         )
         return book_id
