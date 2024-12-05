@@ -144,8 +144,3 @@ class Bot:
                 formatted_reddit_comment + formatter.section_separator + comment_footer
             )
         return None
-
-
-# bot = Bot()
-# bot.listen_to_user()
-# bot.listen_to_subreddits()
