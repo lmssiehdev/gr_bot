@@ -19,7 +19,7 @@ transport = RequestsHTTPTransport(
     url="https://kxbwmqov6jgg3daaamb744ycu4.appsync-api.us-east-1.amazonaws.com/graphql",
     headers={"X-Api-Key": api_key},
 )
-client = Client(transport=transport, fetch_schema_from_transport=True)
+client = Client(transport=transport, fetch_schema_from_transport=False)
 
 # Define the GraphQL query
 query = gql(
