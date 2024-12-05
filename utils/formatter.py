@@ -1,12 +1,36 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Final, TypedDict, List, Optional
 from utils.helpers import extract_asin
 import re
 
 
+class SubredditConfig(TypedDict):
+    amazon_link: bool
+    report_link: bool
+
+
+subreddit_info: Final[Dict[str, SubredditConfig]] = {
+    "suggestmeabook": {
+        "amazon_link": False,
+        "report_link": False,
+    },
+    "booksuggestions": {
+        "amazon_link": False,
+        "report_link": True,
+    },
+}
+
+
 class CommnentFormatter:
-    def __init__(self, book_info, is_long_version: bool, book_suggestions_count: float):
+    def __init__(
+        self,
+        book_info,
+        subreddit: str,
+        is_long_version: bool,
+        book_suggestions_count: float,
+    ):
         self.book_info = book_info
+        self.subreddit = subreddit
         self.is_long_version = is_long_version
         self.book_suggestions_count = book_suggestions_count
         self.section_separator = "\n"
@@ -26,8 +50,11 @@ class CommnentFormatter:
 
         string = f"[**{title}**]({url})"
 
-        # if not self.include_amazon_url:
-        #     return string + self.section_separator
+        if (
+            self.subreddit not in subreddit_info
+            or subreddit_info.get(self.subreddit, {}).get("amazon_link") is False
+        ):
+            return string + self.section_separator
 
         book_id = self.get_amazon_book_id(self.book_info)
 
@@ -125,11 +152,20 @@ class CommnentFormatter:
 
         return f" | Popular Shelves: {shelves_string}"
 
-    @staticmethod
-    def build_comment_footer(suggestions, permalink):
+    def build_comment_footer(self, suggestions, permalink):
         s = "s" if suggestions > 1 else ""
-        return (
+        string = (
             f"^({suggestions} book{s} suggested | ) "
             f"^({{{{ book name }}}} to summon me  | )"
+        )
+
+        if (
+            self.subreddit not in subreddit_info
+            or subreddit_info.get(self.subreddit, {}).get("report_link") is False
+        ):
+            return string
+
+        string += (
             f"[^(Mistake?)](https://gr-bot.vercel.app/report?permalink={permalink})"
         )
+        return string

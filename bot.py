@@ -79,12 +79,11 @@ class Bot:
             comment.reply(formatted_reddit_comment)
 
     def listen_to_subreddits(self):
-        subreddit = reddit.subreddit("booksuggestions")
+        subreddit = reddit.subreddit("booksuggestions+suggestmeabook")
         for comment in subreddit.stream.comments():
             comment_invocations = self.db.count_comment_invocations(comment.id)
             if comment_invocations > 0:
                 continue
-
             formatted_reddit_comment = self.build_bot_comment(comment)
             if (formatted_reddit_comment is None) or (
                 len(formatted_reddit_comment) == 0
@@ -95,6 +94,13 @@ class Bot:
     def build_bot_comment(self, comment):
         submission = comment.submission
         formatted_reddit_comment = ""
+
+        if comment.subreddit.display_name == "suggestmeabook":
+            comment.refresh()
+            for reply in comment.replies.list():
+                if reply.author and reply.author.name == "goodreads-rebot":
+                    return None
+
         for recommendation, is_long_version in extract_recommendations(comment.body)[
             :10
         ]:
@@ -117,6 +123,7 @@ class Bot:
 
             formatter = CommnentFormatter(
                 book_info=book_info,
+                subreddit=comment.subreddit.display_name,
                 is_long_version=is_long_version,
                 book_suggestions_count=book_suggestions_count,
             )
