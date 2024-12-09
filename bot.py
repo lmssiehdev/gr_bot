@@ -79,7 +79,7 @@ class Bot:
             comment.reply(formatted_reddit_comment)
 
     def listen_to_subreddits(self):
-        subreddit = reddit.subreddit("booksuggestions+suggestmeabook")
+        subreddit = reddit.subreddit("booksuggestions")
         for comment in subreddit.stream.comments():
             comment_invocations = self.db.count_comment_invocations(comment.id)
             if comment_invocations > 0:
