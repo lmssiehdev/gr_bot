@@ -15,7 +15,7 @@ subreddit_info: Final[Dict[str, SubredditConfig]] = {
         "report_link": False,
     },
     "booksuggestions": {
-        "amazon_link": False,
+        "amazon_link": True,
         "report_link": True,
     },
 }
